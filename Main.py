@@ -54,6 +54,7 @@ elif auth_status is False:
 elif auth_status is None:
     st.warning("Please enter your credentials.")
 
+
 # st.title('Shopping List')
 
 # # import items.csv and save items grouped by location
