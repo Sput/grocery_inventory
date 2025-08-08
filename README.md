@@ -1,6 +1,6 @@
 # Shopping Codex Next.js Application
 
-This project is a port of the original Streamlit Shopping Codex app to Next.js, using Supabase for authentication and data storage.
+This project is a port of the original Streamlit Shopping Codex app to Next.js, using Supabase for authentication and data storage. This app enables management of your groceries. Rather than create a list from scratch, this app works backwards. You create an inventory, then a list is created based on items not in your inventory.
 
 ## Setup
 1. Copy `.env.local.example` to `.env.local`; the `NEXT_PUBLIC_SUPABASE_URL` is preset, then fill in your keys:
