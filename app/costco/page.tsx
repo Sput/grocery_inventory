@@ -13,11 +13,40 @@ export default function CostcoPage() {
   }, [session]);
 
   async function fetchItems() {
-    const { data } = await supabase
+    const { data: costcoItems, error: costcoError } = await supabase
       .from('costco')
       .select('items')
       .is('is_deleted', null);
-    setItems(data ? data.map((r) => r.items) : []);
+
+    if (costcoError) {
+      console.error('Failed to load Costco items:', costcoError);
+      setItems([]);
+      return;
+    }
+
+    const { data: itemZones, error: itemsError } = await supabase
+      .from('items')
+      .select('name, zone');
+
+    if (itemsError) {
+      console.error('Failed to load item zones:', itemsError);
+      setItems([]);
+      return;
+    }
+
+    const zoneByName = new Map(
+      (itemZones ?? []).map((row) => [row.name.trim(), row.zone ?? Number.POSITIVE_INFINITY]),
+    );
+
+    const sortedItems = (costcoItems ?? [])
+      .slice()
+      .sort((a, b) => {
+        const zoneA = zoneByName.get(a.items.trim()) ?? Number.POSITIVE_INFINITY;
+        const zoneB = zoneByName.get(b.items.trim()) ?? Number.POSITIVE_INFINITY;
+        return zoneA - zoneB;
+      });
+
+    setItems(sortedItems.map((r) => r.items));
   }
 
   if (!session) {

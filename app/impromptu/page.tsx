@@ -23,6 +23,11 @@ export default function ImpromptuPage() {
     if (data) setItems(data.map((r) => r.name.trim()));
   }
 
+  async function handleDelete(itemName: string) {
+    await supabase.from('impromptu_list').update({ is_deleted: true }).eq('name', itemName);
+    fetchItems();
+  }
+
   async function handleSubmit() {
     if (!input) return;
     await supabase.from('impromptu_list').insert({ name: input });
@@ -51,7 +56,12 @@ export default function ImpromptuPage() {
       {items.length > 0 ? (
         <ul className="list-disc pl-5 mb-4">
           {items.map((item, idx) => (
-            <li key={idx}>{item}</li>
+            <li key={idx} className="mb-2 flex items-center justify-between gap-4">
+              <span>{item}</span>
+              <Button variant="destructive" size="sm" onClick={() => handleDelete(item)}>
+                Delete
+              </Button>
+            </li>
           ))}
         </ul>
       ) : (
