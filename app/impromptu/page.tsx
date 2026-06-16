@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 export default function ImpromptuPage() {
   const supabase = useSupabaseClient();
   const session = useSession();
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<Array<{ id: number | string; name: string }>>([]);
   const [input, setInput] = useState('');
 
   useEffect(() => {
@@ -18,19 +18,20 @@ export default function ImpromptuPage() {
   async function fetchItems() {
     const { data, error } = await supabase
       .from('impromptu_list')
-      .select('name')
+      .select('id, name')
       .is('is_deleted', null);
-    if (data) setItems(data.map((r) => r.name.trim()));
+    if (data) setItems(data.map((r) => ({ id: r.id, name: r.name.trim() })));
   }
 
-  async function handleDelete(itemName: string) {
-    await supabase.from('impromptu_list').update({ is_deleted: true }).eq('name', itemName);
+  async function handleDelete(itemId: number | string) {
+    await supabase.from('impromptu_list').update({ is_deleted: true }).eq('id', itemId);
     fetchItems();
   }
 
   async function handleSubmit() {
-    if (!input) return;
-    await supabase.from('impromptu_list').insert({ name: input });
+    const name = input.trim();
+    if (!name) return;
+    await supabase.from('impromptu_list').insert({ name });
     setInput('');
     fetchItems();
   }
@@ -55,10 +56,10 @@ export default function ImpromptuPage() {
       <h1 className="text-2xl font-bold mb-4">Impromptu List</h1>
       {items.length > 0 ? (
         <ul className="list-disc pl-5 mb-4">
-          {items.map((item, idx) => (
-            <li key={idx} className="mb-2 flex items-center justify-between gap-4">
-              <span>{item}</span>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(item)}>
+          {items.map((item) => (
+            <li key={item.id} className="mb-2 flex items-center justify-between gap-4">
+              <span>{item.name}</span>
+              <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
                 Delete
               </Button>
             </li>
